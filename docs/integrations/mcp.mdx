@@ -1,0 +1,110 @@
+---
+title: "MCP Server"
+description: "Control Pwnagent scans from any app or AI agent over the Model Context Protocol"
+---
+
+Pwnagent ships an **MCP (Model Context Protocol) server** so external
+applications — a custom web app, a backend service, or an AI agent — can
+trigger scans and read findings back over a standard protocol.
+
+It works two ways:
+
+- **Trigger** scans (`start_scan`, `cancel_scan`)
+- **Read results** (`get_scan_status`, `list_scans`, `list_findings`, `get_report`, `get_sarif`)
+
+Under the hood the server launches the `pwnagent` CLI in non-interactive mode
+and reads the artifacts each run writes to `pwnagent_runs/<run_name>/`
+(`vulnerabilities.json`, `findings.sarif`, `penetration_test_report.md`,
+`run.json`). Scans run in the background, so `start_scan` returns a `scan_id`
+immediately and you poll for progress.
+
+## Install
+
+The MCP dependency ships as an extra:
+
+```bash
+pip install "pwnagent-agent[mcp]"
+```
+
+## Run the server
+
+```bash
+# LLM config is required — scans inherit the server's environment
+export PWNAGENT_LLM="anthropic/claude-sonnet-5"
+export LLM_API_KEY="sk-..."
+
+pwnagent-mcp
+```
+
+By default it serves **Streamable HTTP** at `http://127.0.0.1:8848/mcp`.
+
+### Configuration
+
+| Env var | Default | Purpose |
+| --- | --- | --- |
+| `PWNAGENT_MCP_TRANSPORT` | `streamable-http` | `streamable-http`, `sse`, or `stdio` |
+| `PWNAGENT_MCP_HOST` | `127.0.0.1` | Bind host |
+| `PWNAGENT_MCP_PORT` | `8848` | Bind port |
+| `PWNAGENT_MCP_WORKDIR` | current dir | Where scans run; `pwnagent_runs/` lives here |
+| `PWNAGENT_BIN` | auto | Override how the CLI is launched |
+
+<Note>
+Docker is still required at runtime — the scan itself runs inside the Pwnagent
+sandbox container. The MCP server only orchestrates the CLI.
+</Note>
+
+## Tools
+
+| Tool | Description |
+| --- | --- |
+| `start_scan(target, scan_mode, instruction?, extra_targets?, max_budget_usd?)` | Launch a scan; returns `scan_id` + `run_name` |
+| `get_scan_status(scan_id)` | Lifecycle state, finding counts, severity breakdown, cost |
+| `list_scans()` | All scans this server launched or recovered |
+| `list_findings(scan_id, severity?, full?)` | Findings (optionally filtered / full detail) |
+| `get_report(scan_id)` | Executive markdown report |
+| `get_sarif(scan_id)` | SARIF 2.1.0 document for security dashboards |
+| `cancel_scan(scan_id)` | Terminate a running scan |
+
+Resources: `pwnagent://scans`, `pwnagent://scans/{scan_id}/report`,
+`pwnagent://scans/{scan_id}/findings`.
+
+## Example client
+
+```python
+import asyncio, json
+from mcp.client.streamable_http import streamablehttp_client
+from mcp.client.session import ClientSession
+
+
+async def main():
+    async with streamablehttp_client("http://127.0.0.1:8848/mcp") as (r, w, _):
+        async with ClientSession(r, w) as session:
+            await session.initialize()
+
+            started = await session.call_tool(
+                "start_scan", {"target": "https://example.com", "scan_mode": "quick"}
+            )
+            scan_id = json.loads(started.content[0].text)["scan_id"]
+
+            while True:
+                status = json.loads(
+                    (await session.call_tool("get_scan_status", {"scan_id": scan_id})).content[0].text
+                )
+                if status["state"] in ("completed", "failed"):
+                    break
+                await asyncio.sleep(5)
+
+            findings = await session.call_tool("list_findings", {"scan_id": scan_id})
+            print(findings.content[0].text)
+
+
+asyncio.run(main())
+```
+
+## Connecting from a custom web app
+
+Point your web-app backend's MCP client at the server URL and call the tools
+above. Because the transport is Streamable HTTP, any language with an MCP
+client (or a plain HTTP client speaking the MCP JSON-RPC framing) can drive it.
+For AI-agent frontends (Claude, etc.), register the server URL as an MCP tool
+provider and the model can start scans and summarize findings directly.
