@@ -1,281 +1,519 @@
+
+<h1 align="center">Pwnagent Sandbox</h1>
+
 <p align="center">
-  <a href="https://pwnagent.ai/">
-    <img src="https://github.com/punitdarji/.github/raw/main/imgs/cover.png" alt="Pwnagent Banner" width="100%">
-  </a>
+  <b>Autonomous AI Penetration Testing Agent + Dockerized Offensive Security Sandbox</b>
 </p>
 
-<div align="center">
+---
 
-# Pwnagent
+## What is Pwnagent Sandbox?
 
-### The open-source AI pentesting tool. Autonomous AI hackers that find and fix your app’s vulnerabilities.
+Pwnagent Sandbox is the open-source runtime environment for **pwnagent.exe** — an autonomous AI penetration testing agent. The sandbox provides a fully equipped, Kali Linux-based Docker container with pre-installed offensive security tools, an HTTP interception proxy (Caido), a headless browser, and a Python exploit runtime. When **pwnagent.exe** connects to the sandbox, it orchestrates multi-agent security assessments that discover, validate, and report real vulnerabilities with working proofs-of-concept.
 
-<br/>
-
-
-<a href="https://docs.pwnagent.ai"><img src="https://img.shields.io/badge/Docs-docs.pwnagent.ai-2b9246?style=for-the-badge&logo=gitbook&logoColor=white" alt="Docs"></a>
-<a href="https://pwnagent.ai"><img src="https://img.shields.io/badge/Website-pwnagent.ai-f0f0f0?style=for-the-badge&logoColor=000000" alt="Website"></a>
-[![](https://dcbadge.limes.pink/api/server/pwnagent-ai)](https://discord.gg/pwnagent-ai)
-
-<a href="https://deepwiki.com/punitdarji/pwnagent"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
-<a href="https://github.com/punitdarji/pwnagent"><img src="https://img.shields.io/github/stars/punitdarji/pwnagent?style=flat-square" alt="GitHub Stars"></a>
-<a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-3b82f6?style=flat-square" alt="License"></a>
-<a href="https://pypi.org/project/pwnagent-agent/"><img src="https://img.shields.io/pypi/v/pwnagent-agent?style=flat-square" alt="PyPI Version"></a>
-
-
-<a href="https://discord.gg/pwnagent-ai"><img src="https://github.com/punitdarji/.github/raw/main/imgs/Discord.png" height="40" alt="Join Discord"></a>
-<a href="https://x.com/pwnagent_ai"><img src="https://github.com/punitdarji/.github/raw/main/imgs/X.png" height="40" alt="Follow on X"></a>
-
-
-<a href="https://trendshift.io/repositories/15362?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-15362" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/trendshift/repositories/15362/weekly" alt="punitdarji%2Fpwnagent | Trendshift" width="250" height="55"/></a>
-<a href="https://trendshift.io/repositories/15362" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15362" alt="punitdarji/pwnagent | Trendshift" width="250" height="55"/></a>
-
-</div>
-
-
-> [!TIP]
-> **New!** Pwnagent integrates seamlessly with GitHub Actions and CI/CD pipelines. Automatically scan for vulnerabilities on every pull request and block insecure code before it reaches production - [Get started with no setup required](https://app.pwnagent.ai).
+**pwnagent.exe** is the compiled CLI binary (built via PyInstaller from this repository). It handles LLM orchestration, the TUI/CLI interface, scan lifecycle, and communicates with the sandbox container over the Docker API and Caido SDK.
 
 ---
 
+## Features
 
-## Pwnagent Overview
+### AI-Powered Agent Orchestration
+- **Multi-agent graph** — a root agent spawns specialized child agents for recon, exploitation, and post-exploitation that collaborate and share discoveries in real time.
+- **Resumable scans** — interrupted scans can be resumed from the exact agent state with `--resume <run-name>`.
+- **Budget controls** — set a hard USD cap on LLM spend per scan with `--max-budget-usd`.
 
-Pwnagent are autonomous AI penetration testing agents that act just like real hackers - they run your code dynamically, find vulnerabilities, and validate them through actual proofs-of-concept. Built for developers and security teams who need fast, accurate security testing without the overhead of manual pentesting or the false positives of static analysis tools.
+### Offensive Security Toolkit (inside the sandbox)
+- **Network scanning** — Nmap, Naabu, Subfinder, httpx, Katana
+- **Vulnerability scanning** — Nuclei (with auto-updated templates), SQLMap, Wapiti, ZAP, Trivy, Semgrep, Bandit
+- **Web exploitation** — Chromium-based headless browser (agent-browser), FFuf, Arjun, Dirsearch, wafw00f
+- **HTTP interception proxy** — Caido (auto-started, full request/response capture and manipulation)
+- **Secret scanning** — TruffleHog, Gitleaks
+- **Code analysis** — ast-grep, tree-sitter (Java, JS, Python, Go, Bash, JSON, YAML, TypeScript), ESLint, JSHint
+- **JWT & auth testing** — jwt_tool, JS-Snooper, jsniper
+- **Exploit development** — Python venv sandbox, GDB, full GCC toolchain
 
-**Key Capabilities:**
+### Comprehensive Vulnerability Coverage
+Covers the OWASP Top 10 and beyond with built-in skill files for:
 
-- **Full pentesting toolkit** - reconnaissance, exploitation, and validation out of the box
-- **Multi-agent orchestration** - teams of AI pentesters that collaborate and scale
-- **Real exploit validation** - working PoCs, not false positives like legacy vulnerability scanners
-- **Developer‑first CLI** - actionable findings with remediation guidance
-- **Auto‑fix & reporting** - generate patches and compliance-ready pentest reports
+| Category | Vulnerabilities |
+|---|---|
+| **Injection** | SQL injection, NoSQL injection, SSTI, OS command injection, XXE |
+| **Broken Access Control** | IDOR, mass assignment, broken function-level authorization |
+| **Authentication** | JWT attacks, weak passwords, OAuth flaws, Auth0 misconfigurations |
+| **Client-Side** | XSS (stored/reflected/DOM), CSRF, prototype pollution, open redirect |
+| **Server-Side** | SSRF, RCE, insecure deserialization, path traversal/LFI/RFI |
+| **Business Logic** | Race conditions, payment manipulation, workflow bypass |
+| **Infrastructure** | Subdomain takeover, HTTP request smuggling, header injection |
+| **Cloud & DevOps** | AWS, GCP, Kubernetes misconfigurations |
+| **Supply Chain** | Dependency CVE scanning, Nuclei CVE templates |
+| **AI/LLM** | Prompt injection in LLM-powered features |
 
+### Framework-Aware Scanning
+Built-in skills for Django, FastAPI, NestJS, Next.js, GraphQL, Firebase/Firestore, and Supabase.
 
-<br>
+### Scan Modes
+- **quick** — fast CI/CD checks, scoped to changed files in PRs
+- **standard** — routine white-box source-aware testing
+- **deep** — thorough security review (default)
 
+### Multi-Provider LLM Support
+Works with any LLM provider via LiteLLM:
+- OpenAI (GPT-5.x series)
+- Anthropic (Claude Opus, Sonnet, Fable)
+- Google (Gemini 3.x via Vertex AI)
+- DeepSeek (v4 series)
+- Alibaba (Qwen 3.x via DashScope)
+- Moonshot (Kimi K2.x)
+- Azure, Bedrock, OpenRouter, Ollama, LM Studio, and any OpenAI-compatible endpoint
 
-<div align="center">
-  <a href="https://pwnagent.ai">
-    <img src=".github/screenshot.png" alt="Pwnagent Demo" width="1000" style="border-radius: 16px;">
-  </a>
-</div>
+### Reporting & CI/CD
+- Real-time vulnerability display with CVSS scoring
+- Executive summary report on scan completion
+- Non-interactive mode (`-n`) for headless/CI environments with non-zero exit on findings
+- GitHub Actions workflow included for PR-level security gating
 
+---
 
-## Use Cases
+## Architecture
 
-- **Application Security Testing** - Detect and validate critical vulnerabilities in your applications
-- **Rapid Penetration Testing** - Get penetration tests done in hours, not weeks, with compliance reports
-- **Bug Bounty Automation** - Automate bug bounty research and generate PoCs for faster reporting
-- **CI/CD Integration** - Run tests in CI/CD to block vulnerabilities before reaching production
-
-## 🚀 Quick Start
-
-**Prerequisites:**
-- Docker (running)
-- An LLM API key from any [supported provider](https://docs.pwnagent.ai/llm-providers/overview) (OpenAI, Anthropic, Google, etc.)
-
-### Installation & First Scan
-
-```bash
-# Install Pwnagent
-curl -sSL https://pwnagent.ai/install | bash
-
-# Configure your AI provider
-export PWNAGENT_LLM="openai/gpt-5.4"
-export LLM_API_KEY="your-api-key"
-
-# Run your first security assessment
-pwnagent --target ./app-directory
+```
++------------------+          Docker API / SDK          +----------------------------+
+|                  | -------------------------------------> |                            |
+|  pwnagent.exe    |          Caido SDK (GraphQL)       |   Sandbox Container        |
+|  (Host Machine)  | -------------------------------------> |   (Kali Linux)             |
+|                  |                                    |                            |
+|  - LLM client    |                                    |   - Caido proxy (port 48080)|
+|  - Agent graph   |                                    |   - Nmap, Nuclei, SQLMap    |
+|  - TUI / CLI     |                                    |   - Headless Chromium       |
+|  - Report writer |                                    |   - Python exploit venv     |
+|  - Scan lifecycle|                                    |   - 40+ security tools      |
++------------------+                                    +----------------------------+
+        |                                                           |
+        |  LLM API (OpenAI / Anthropic / etc.)                     |  Targets
+        v                                                           v
+  +-----------+                                           +------------------+
+  | LLM       |                                           | Web apps, repos, |
+  | Provider  |                                           | IPs, domains     |
+  +-----------+                                           +------------------+
 ```
 
-> [!NOTE]
-> First run automatically pulls the sandbox Docker image. Results are saved to `pwnagent_runs/<run-name>`
+---
+
+## Requirements
+
+### System Requirements
+| Requirement | Details |
+|---|---|
+| **OS** | Windows 10/11, macOS (Intel or Apple Silicon), or Linux (x86_64) |
+| **Docker** | Docker Desktop or Docker Engine — must be running |
+| **RAM** | 8 GB minimum (16 GB recommended for deep scans) |
+| **Disk** | ~5 GB for the sandbox Docker image |
+| **Network** | Internet access for LLM API calls and pulling the sandbox image |
+
+### Software Requirements
+| Component | Purpose |
+|---|---|
+| **pwnagent.exe** | The compiled agent binary (see [Building from Source](#building-from-source)) |
+| **Docker** | Hosts the sandbox container with all pentesting tools |
+| **LLM API Key** | From any supported provider (OpenAI, Anthropic, Google, etc.) |
+
+### Environment Variables
+
+**Required:**
+
+| Variable | Description | Example |
+|---|---|---|
+| `PWNAGENT_LLM` | LLM model identifier in `provider/model` format | `openai/gpt-5.4` |
+
+**Optional:**
+
+| Variable | Description | Default |
+|---|---|---|
+| `LLM_API_KEY` | API key for the LLM provider (not needed for local models, Vertex AI, AWS) | — |
+| `LLM_API_BASE` | Custom API base URL for local models (Ollama, LM Studio) | — |
+| `LLM_TIMEOUT` | LLM request timeout in seconds | `300` |
+| `PERPLEXITY_API_KEY` | Enables real-time web search during scans | — |
+| `GITHUB_TOKEN` | For private repository access | — |
+| `PWNAGENT_REASONING_EFFORT` | Thinking depth: `none`, `minimal`, `low`, `medium`, `high`, `xhigh` | `high` |
+| `PWNAGENT_IMAGE` | Custom sandbox Docker image | `ghcr.io/punitdarji/pwnagent-sandbox:1.0.0` |
+| `PWNAGENT_RUNTIME_BACKEND` | Container backend | `docker` |
+| `PWNAGENT_MAX_LOCAL_COPY_MB` | Max local target size before requiring `--mount` | `1024` |
+| `PWNAGENT_TELEMETRY` | Enable/disable telemetry | `true` |
 
 ---
 
-## ☁️ Pwnagent Platform
+## Installation
 
-Try the Pwnagent full-stack penetration testing platform at **[app.pwnagent.ai](https://app.pwnagent.ai)** - sign up for free, connect your repos and domains, and launch a pentest in minutes.
+### Option 1: Download Pre-built Binary
 
-- **Validated findings with PoCs** - every vulnerability includes a working proof-of-concept exploit and reproduction steps
-- **One-click autofix** - AI-generated security patches as ready-to-merge pull requests
-- **Continuous pentesting** - always-on vulnerability scanning that keeps pace with your deployments
-- **DevSecOps integrations** - GitHub, GitLab, Bitbucket, Slack, Jira, Linear, and CI/CD pipelines
-- **Continuous learning** - AI that builds on past findings, adapts to your codebase, and reduces false positives over time
+Download the binary for your platform from the [Releases](https://github.com/punitdarji/pwnagent/releases) page.
 
-[**Start your first pentest →**](https://app.pwnagent.ai)
+#### Windows
 
----
+1. Download `pwnagent-<version>-windows-x86_64.zip` from Releases.
+2. Extract the ZIP — you'll get `pwnagent.exe`.
+3. Move `pwnagent.exe` to a folder in your PATH, or run it directly:
 
-## ✨ Features
+```powershell
+# Option A: Run from the current directory
+.\pwnagent.exe --target https://example.com
 
-### Agentic Pentesting Tools
+# Option B: Add to PATH permanently (run PowerShell as Administrator)
+New-Item -ItemType Directory -Force -Path "C:\Tools\pwnagent"
+Move-Item .\pwnagent.exe "C:\Tools\pwnagent\pwnagent.exe"
+[Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\Tools\pwnagent", "Machine")
+# Restart your terminal, then use from anywhere:
+pwnagent --target https://example.com
+```
 
-Pwnagent agents come equipped with a comprehensive offensive security toolkit - the same tools used by professional penetration testers and ethical hackers:
+4. Set your environment variables:
 
-- **HTTP Interception Proxy** - Full request/response manipulation and analysis with Caido
-- **Browser Exploitation** - Automated browser for testing XSS, CSRF, clickjacking, and auth bypass flows
-- **Shell & Command Execution** - Interactive terminal for exploit development and post-exploitation
-- **Custom Exploit Runtime** - Python sandbox for writing and validating proof-of-concept exploits
-- **Reconnaissance & OSINT** - Automated attack surface mapping, subdomain enumeration, and fingerprinting
-- **Static & Dynamic Code Analysis** - SAST + DAST capabilities for comprehensive application security testing
-- **Vulnerability Knowledge Base** - Structured findings with CVSS scoring and OWASP classification
+```powershell
+# Set for current session
+$env:PWNAGENT_LLM = "openai/gpt-5.4"
+$env:LLM_API_KEY = "sk-..."
 
-### Comprehensive Vulnerability Scanner
+# Or set permanently (persists across terminal sessions)
+[Environment]::SetEnvironmentVariable("PWNAGENT_LLM", "openai/gpt-5.4", "User")
+[Environment]::SetEnvironmentVariable("LLM_API_KEY", "sk-...", "User")
+```
 
-Pwnagent identifies, validates, and exploits a wide range of security vulnerabilities across the OWASP Top 10 and beyond:
+> **Windows prerequisite:** [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop/) must be installed and running. Make sure WSL 2 backend is enabled in Docker Desktop settings.
 
-- **Broken Access Control** - IDOR, privilege escalation, auth bypass
-- **Injection Attacks** - SQL injection, NoSQL injection, OS command injection, SSTI
-- **Server-Side Vulnerabilities** - SSRF, XXE, insecure deserialization, RCE
-- **Client-Side Attacks** - XSS (stored/reflected/DOM), prototype pollution, CSRF
-- **Business Logic Flaws** - Race conditions, payment manipulation, workflow bypass
-- **Authentication & Session** - JWT attacks, session fixation, credential stuffing vectors
-- **Infrastructure & Cloud** - Misconfigurations, exposed services, cloud security issues
-- **API Security** - Broken authentication, mass assignment, rate limiting bypass
-
-### Graph of Agents (Multi-Agent Pentesting)
-
-Advanced multi-agent orchestration for comprehensive automated penetration testing:
-
-- **Distributed Pentesting** - Specialized AI agents for recon, exploitation, and post-exploitation
-- **Scalable Security Testing** - Parallel execution across multiple targets for fast, comprehensive coverage
-- **Dynamic Coordination** - Agents share discoveries, chain vulnerabilities, and collaborate like a red team
-
----
-
-## Usage Examples
-
-### Basic Usage
+#### macOS
 
 ```bash
-# Scan a local codebase
-pwnagent --target ./app-directory
+# Apple Silicon (M1/M2/M3/M4)
+curl -LO https://github.com/punitdarji/pwnagent/releases/latest/download/pwnagent-<version>-macos-arm64.tar.gz
+tar -xzf pwnagent-*-macos-arm64.tar.gz
+chmod +x pwnagent-*-macos-arm64
+sudo mv pwnagent-*-macos-arm64 /usr/local/bin/pwnagent
 
-# Security review of a GitHub repository
-pwnagent --target https://github.com/org/repo
+# Intel Mac
+curl -LO https://github.com/punitdarji/pwnagent/releases/latest/download/pwnagent-<version>-macos-x86_64.tar.gz
+tar -xzf pwnagent-*-macos-x86_64.tar.gz
+chmod +x pwnagent-*-macos-x86_64
+sudo mv pwnagent-*-macos-x86_64 /usr/local/bin/pwnagent
+```
 
-# Black-box web application assessment
+#### Linux
+
+```bash
+curl -LO https://github.com/punitdarji/pwnagent/releases/latest/download/pwnagent-<version>-linux-x86_64.tar.gz
+tar -xzf pwnagent-*-linux-x86_64.tar.gz
+chmod +x pwnagent-*-linux-x86_64
+sudo mv pwnagent-*-linux-x86_64 /usr/local/bin/pwnagent
+```
+
+### Option 2: Install via pip/pipx
+
+```bash
+pipx install pwnagent-agent
+
+# With optional provider extras
+pipx install "pwnagent-agent[bedrock]"   # AWS Bedrock
+pipx install "pwnagent-agent[vertex]"    # Google Vertex AI
+```
+
+On Windows (if pipx is installed via `pip install pipx` or `scoop install pipx`):
+
+```powershell
+pipx install pwnagent-agent
+```
+
+### Option 3: Build from Source
+
+Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
+
+#### Windows
+
+```powershell
+git clone https://github.com/punitdarji/pwnagent.git
+cd pwnagent
+
+# Install uv if not already installed
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Install dependencies and build
+uv sync --frozen
+uv run pyinstaller pwnagent.spec --noconfirm
+
+# Binary is at dist\pwnagent.exe
+```
+
+#### macOS / Linux
+
+```bash
+git clone https://github.com/punitdarji/pwnagent.git
+cd pwnagent
+
+# Install uv if not already installed
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install dependencies and build
+uv sync --frozen
+uv run pyinstaller pwnagent.spec --noconfirm
+
+# Binary is at dist/pwnagent
+```
+
+### Docker Image (First Run)
+
+On first launch, pwnagent automatically pulls the sandbox image (`ghcr.io/punitdarji/pwnagent-sandbox:1.0.0`). This is a one-time ~5 GB download. No manual Docker setup is needed beyond having Docker running.
+
+**Windows users:** Make sure Docker Desktop is running (look for the whale icon in the system tray). If you see a "Docker daemon is not running" error, open Docker Desktop and wait for it to finish starting.
+
+---
+
+## Connecting pwnagent.exe with the Sandbox
+
+The connection between **pwnagent.exe** and the sandbox is fully automatic. Here is what happens under the hood:
+
+1. **pwnagent.exe** checks that Docker is installed and running.
+2. It pulls the sandbox image if not already present locally.
+3. It creates a Docker container from the image with:
+   - The Caido HTTP interception proxy auto-started on port 48080
+   - System-wide proxy configuration inside the container
+   - CA certificates installed and trusted (for HTTPS interception)
+   - A `/workspace` directory for target code and scan artifacts
+4. **pwnagent.exe** connects to the container via the Docker SDK and Caido GraphQL API.
+5. The root AI agent is initialized with the scan configuration, then spawns child agents as needed.
+6. All tool execution (Nmap scans, Nuclei templates, browser actions, exploit scripts) runs inside the sandbox.
+7. Findings are streamed back to **pwnagent.exe** in real time and displayed in the TUI or CLI.
+
+### What You Need to Do
+
+**Linux / macOS:**
+
+```bash
+# 1. Make sure Docker is running
+docker info
+
+# 2. Set your LLM provider
+export PWNAGENT_LLM="openai/gpt-5.4"
+export LLM_API_KEY="sk-..."
+
+# 3. Run a scan — the sandbox connection is automatic
 pwnagent --target https://your-app.com
 ```
 
-### Advanced Testing Scenarios
+**Windows (PowerShell):**
 
-```bash
-# Grey-box authenticated testing
-pwnagent --target https://your-app.com --instruction "Perform authenticated testing using credentials: user:pass"
+```powershell
+# 1. Make sure Docker Desktop is running
+docker info
 
-# Multi-target testing (source code + deployed app)
-pwnagent -t https://github.com/org/app -t https://your-app.com
+# 2. Set your LLM provider
+$env:PWNAGENT_LLM = "openai/gpt-5.4"
+$env:LLM_API_KEY = "sk-..."
 
-# Targets from a file, one target per non-empty, non-comment line
-pwnagent --target-list ./targets.txt
-
-# White-box source-aware scan (local repository)
-pwnagent --target ./app-directory --scan-mode standard
-
-# Focused testing with custom instructions
-pwnagent --target api.your-app.com --instruction "Focus on business logic flaws and IDOR vulnerabilities"
-
-# Provide detailed instructions through file (e.g., rules of engagement, scope, exclusions)
-pwnagent --target api.your-app.com --instruction-file ./instruction.md
-
-# Force PR diff-scope against a specific base branch
-pwnagent -n --target ./ --scan-mode quick --scope-mode diff --diff-base origin/main
+# 3. Run a scan — the sandbox connection is automatic
+pwnagent.exe --target https://your-app.com
 ```
 
-### Headless Mode
+**Windows (Command Prompt):**
 
-Run Pwnagent programmatically without interactive UI using the `-n/--non-interactive` flag - perfect for servers and automated jobs. The CLI prints real-time vulnerability findings and the final report before exiting. Exits with non-zero code when vulnerabilities are found.
+```cmd
+:: 1. Make sure Docker Desktop is running
+docker info
+
+:: 2. Set your LLM provider
+set PWNAGENT_LLM=openai/gpt-5.4
+set LLM_API_KEY=sk-...
+
+:: 3. Run a scan
+pwnagent.exe --target https://your-app.com
+```
+
+That's it. No manual container management, no port mapping, no volume mounts (unless you want `--mount` for large repos).
+
+---
+
+## Usage
+
+### Basic Scans
 
 ```bash
+# Web application penetration test
+pwnagent --target https://example.com
+
+# GitHub repository analysis
+pwnagent --target https://github.com/org/repo
+
+# Local codebase (white-box)
+pwnagent --target ./my-project
+
+# IP address / domain
+pwnagent --target 192.168.1.42
+pwnagent --target example.com
+```
+
+### Advanced Usage
+
+```bash
+# Multi-target (source + deployed app)
+pwnagent -t https://github.com/org/app -t https://app.example.com
+
+# Targets from file
+pwnagent --target-list ./targets.txt
+
+# Authenticated testing with custom instructions
+pwnagent --target https://app.com --instruction "Use credentials admin:pass123. Focus on IDOR and auth bypass."
+
+# Instructions from file
+pwnagent --target https://app.com --instruction-file ./scope.md
+
+# Large repos — bind-mount instead of copying
+pwnagent --mount ./huge-monorepo
+
+# Quick CI scan scoped to changed files
+pwnagent -n -t ./ --scan-mode quick --scope-mode diff --diff-base origin/main
+
+# Set a budget cap
+pwnagent --target https://app.com --max-budget-usd 10.00
+
+# Resume an interrupted scan
+pwnagent --resume my-scan-2025-08-20
+```
+
+### Non-Interactive / CI Mode
+
+```bash
+# Headless mode — prints findings to stdout, exits with code 2 if vulns found
 pwnagent -n --target https://your-app.com
 ```
 
-### CI/CD (GitHub Actions)
+## Configuration
 
-Pwnagent can be added to your pipeline to run a security test on pull requests with a lightweight GitHub Actions workflow:
-
-```yaml
-name: pwnagent-penetration-test
-
-on:
-  pull_request:
-
-jobs:
-  security-scan:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Install Pwnagent
-        run: curl -sSL https://pwnagent.ai/install | bash
-
-      - name: Run Pwnagent
-        env:
-          PWNAGENT_LLM: ${{ secrets.PWNAGENT_LLM }}
-          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-
-        run: pwnagent -n -t ./ --scan-mode quick
-```
-
-> [!TIP]
-> In CI pull request runs, Pwnagent automatically scopes quick reviews to changed files.
-> If diff-scope cannot resolve, ensure checkout uses full history (`fetch-depth: 0`) or pass
-> `--diff-base` explicitly.
-
-### Configuration
+Pwnagent auto-saves configuration to `~/.pwnagent/cli-config.json` after the first run. You can also provide a custom config file:
 
 ```bash
-export PWNAGENT_LLM="openai/gpt-5.4"
-export LLM_API_KEY="your-api-key"
-
-# Optional
-export LLM_API_BASE="your-api-base-url"  # if using a local model, e.g. Ollama, LMStudio
-export PERPLEXITY_API_KEY="your-api-key"  # for search capabilities
-export PWNAGENT_REASONING_EFFORT="high"  # control thinking effort (default: high, quick scan: medium)
+pwnagent --config ./my-config.json --target https://app.com
 ```
 
-> [!NOTE]
-> Pwnagent automatically saves your configuration to `~/.pwnagent/cli-config.json`, so you don't have to re-enter it on every run.
+### Recommended Models
 
-**Recommended models for best results:**
+| Provider | Model | ID |
+|---|---|---|
+| OpenAI | GPT-5.4 | `openai/gpt-5.4` |
+| Anthropic | Claude Sonnet 4.6 | `anthropic/claude-sonnet-4-6` |
+| Google | Gemini 3 Pro | `vertex_ai/gemini-3-pro-preview` |
+| DeepSeek | DeepSeek V4 Pro | `deepseek/deepseek-v4-pro` |
+| Moonshot | Kimi K2.7 Code | `moonshot/kimi-k2.7-code` |
 
-- [OpenAI GPT-5.4](https://openai.com/api/) - `openai/gpt-5.4`
-- [Anthropic Claude Sonnet 4.6](https://claude.com/platform/api) - `anthropic/claude-sonnet-4-6`
-- [Google Gemini 3 Pro Preview](https://cloud.google.com/vertex-ai) - `vertex_ai/gemini-3-pro-preview`
+For the full list of supported providers and models, see the [LLM Providers documentation](https://docs.pwnagent.ai/llm-providers/overview).
 
-See the [LLM Providers documentation](https://docs.pwnagent.ai/llm-providers/overview) for all supported providers including Vertex AI, Bedrock, Azure, and local models.
+---
 
-## Enterprise Pentesting
+## Project Structure
 
-Get the same Pwnagent experience with [enterprise-grade](https://pwnagent.ai/demo) controls: SSO (SAML/OIDC), custom compliance-ready penetration testing reports (SOC 2, ISO 27001, PCI DSS), dedicated support & SLA, custom deployment options (VPC/self-hosted), BYOK model support, and tailored AI pentesting agents optimized for your environment. [Learn more](https://pwnagent.ai/demo).
+```
+pwnagent-sandbox/
+├── pwnagent/
+│   ├── agents/           # Agent factory, system prompt templates (Jinja2)
+│   ├── config/           # Settings, LLM model configuration, provider routing
+│   ├── core/             # Scan runner, agent coordinator, execution loop, sessions
+│   ├── integrations/     # MCP server integration
+│   ├── interface/        # CLI (Rich), TUI (Textual), argument parsing
+│   ├── report/           # Vulnerability deduplication, report state, writer
+│   ├── runtime/          # Docker client, Caido bootstrap, session manager
+│   ├── skills/           # 55+ Markdown skill files (vulns, frameworks, tools, cloud)
+│   ├── telemetry/        # PostHog + Scarf telemetry
+│   └── tools/            # Agent tool implementations
+│       ├── agents_graph/ # Multi-agent spawn/coordination tools
+│       ├── cve_scanner/  # CVE scanning tool
+│       ├── finish/       # Scan lifecycle tool
+│       ├── notes/        # Agent note-taking tools
+│       ├── proxy/        # Caido proxy interaction tools
+│       ├── python/       # In-sandbox Python execution tool
+│       ├── reporting/    # Vulnerability reporting tool
+│       ├── thinking/     # Chain-of-thought reasoning tool
+│       ├── todo/         # Task tracking tools
+│       └── web_search/   # Perplexity web search tool
+├── containers/
+│   ├── Dockerfile        # Kali-based sandbox image with 40+ security tools
+│   └── docker-entrypoint.sh  # Caido startup, proxy config, CA trust
+├── docs/                 # Mintlify documentation source
+├── benchmarks/           # Performance benchmarks
+├── .github/
+│   └── workflows/
+│       └── build-release.yml  # CI: build binaries for Win/Mac/Linux + GitHub Release
+├── pwnagent.spec         # PyInstaller spec for building pwnagent.exe
+├── Makefile              # Dev commands: format, lint, type-check, security
+└── LICENSE               # Apache 2.0
+```
 
-## Documentation
+---
 
-Full documentation is available at **[docs.pwnagent.ai](https://docs.pwnagent.ai)** - including detailed guides for usage, CI/CD integrations, skills, and advanced configuration.
+## Building the Sandbox Image Locally
 
-## Contributing
+If you want to build the Docker sandbox image yourself instead of pulling from the registry:
 
-We welcome contributions of code, docs, and new skills - check out our [Contributing Guide](https://docs.pwnagent.ai/contributing) to get started or open a [pull request](https://github.com/punitdarji/pwnagent/pulls)/[issue](https://github.com/punitdarji/pwnagent/issues).
+```bash
+docker build -t pwnagent-sandbox:local -f containers/Dockerfile .
 
-## Join Our Community
+# Tell pwnagent to use your local image
+export PWNAGENT_IMAGE="pwnagent-sandbox:local"
+pwnagent --target https://app.com
+```
 
-Have questions? Found a bug? Want to contribute? **[Join our Discord!](https://discord.gg/pwnagent-ai)**
+---
 
-## Support the Project
+## Development
 
-**Love Pwnagent?** Give us a ⭐ on GitHub!
+```bash
+# Set up the development environment
+make setup-dev
 
-## Acknowledgements
+# Run all quality checks
+make check-all
 
-Pwnagent builds on the incredible work of open-source projects like [LiteLLM](https://github.com/BerriAI/litellm), [Caido](https://github.com/caido/caido), [Nuclei](https://github.com/projectdiscovery/nuclei), [Playwright](https://github.com/microsoft/playwright), and [Textual](https://github.com/Textualize/textual). Huge thanks to their maintainers!
+# Individual checks
+make format       # Format with ruff
+make lint         # Lint with ruff
+make type-check   # mypy + pyright
+make security     # bandit security scan
 
+# Clean build artifacts
+make clean
+```
 
-> [!WARNING]
-> Only test apps you own or have permission to test. You are responsible for using Pwnagent ethically and legally.
+---
 
-</div>
+## Troubleshooting
+
+### General
+
+| Issue | Solution |
+|---|---|
+| `Docker not installed` | Install Docker Desktop and ensure the `docker` command is in your PATH |
+| `Docker daemon not running` | Start Docker Desktop or run `sudo systemctl start docker` (Linux) |
+| `LLM CONNECTION FAILED` | Check that `PWNAGENT_LLM` and `LLM_API_KEY` are set correctly |
+| `Unknown model name` | Use the `provider/model` format, e.g. `openai/gpt-5.4` not just `gpt-5.4` |
+| `Local target too large` | Use `--mount ./path` instead of `--target ./path` for large repos |
+| `Missing boto3` | Install Bedrock support: `pipx install "pwnagent-agent[bedrock]"` |
+| `Missing google-auth` | Install Vertex AI support: `pipx install "pwnagent-agent[vertex]"` |
+| Scan interrupted | Resume with `pwnagent --resume <run-name>` |
+
+### Windows-Specific
+
+| Issue | Solution |
+|---|---|
+| `docker: command not found` | Install [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop/). After installation, restart your terminal. |
+| Docker Desktop won't start | Enable WSL 2 in Windows Features (`wsl --install`), then restart your PC. In Docker Desktop settings, ensure "Use the WSL 2 based engine" is checked. |
+| `pwnagent.exe` not recognized | Either run from the directory where the `.exe` is located (`.\pwnagent.exe`) or add its folder to the system PATH (see [Windows installation](#windows)). |
+| Environment variables not persisting | Use `[Environment]::SetEnvironmentVariable("PWNAGENT_LLM", "openai/gpt-5.4", "User")` in PowerShell to set permanently. Variables set with `$env:` or `set` only last for the current session. |
+| Antivirus blocks `pwnagent.exe` | PyInstaller binaries can trigger false positives. Add `pwnagent.exe` to your antivirus exclusion list, or build from source to avoid this. |
+| `WindowsSelectorEventLoopPolicy` error | This is handled automatically. If you see async errors, make sure you're using Python 3.12+ when building from source. |
+| Sandbox image pull is slow | The first pull downloads ~5 GB. On WSL 2, Docker stores images in the WSL filesystem. Ensure you have enough disk space on your WSL virtual disk. |
+| Path issues with `--target .\my-project` | Use forward slashes (`--target ./my-project`) or quote the path (`--target ".\my-project"`). |
+
+---
+
+## License
+
+Apache License 2.0 — see [LICENSE](LICENSE) for details.
+
+---
+
+> **WARNING:** Only test applications and systems you own or have explicit written authorization to test. You are solely responsible for using Pwnagent ethically and legally. Unauthorized penetration testing is illegal.
