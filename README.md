@@ -194,9 +194,6 @@ curl -LO https://github.com/punitdarji/pwnagent/releases/latest/download/pwnagen
 tar -xzf pwnagent-*-macos-x86_64.tar.gz
 chmod +x pwnagent-*-macos-x86_64
 sudo mv pwnagent-*-macos-x86_64 /usr/local/bin/pwnagent
-
-# Or use the install script (auto-detects architecture)
-curl -sSL https://pwnagent.ai/install | bash
 ```
 
 #### Linux
@@ -206,9 +203,6 @@ curl -LO https://github.com/punitdarji/pwnagent/releases/latest/download/pwnagen
 tar -xzf pwnagent-*-linux-x86_64.tar.gz
 chmod +x pwnagent-*-linux-x86_64
 sudo mv pwnagent-*-linux-x86_64 /usr/local/bin/pwnagent
-
-# Or use the install script
-curl -sSL https://pwnagent.ai/install | bash
 ```
 
 ### Option 2: Install via pip/pipx
@@ -388,34 +382,6 @@ pwnagent --resume my-scan-2025-08-20
 # Headless mode — prints findings to stdout, exits with code 2 if vulns found
 pwnagent -n --target https://your-app.com
 ```
-
-### GitHub Actions Integration
-
-```yaml
-name: pwnagent-security-scan
-
-on:
-  pull_request:
-
-jobs:
-  security-scan:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Install Pwnagent
-        run: curl -sSL https://pwnagent.ai/install | bash
-
-      - name: Run Pwnagent
-        env:
-          PWNAGENT_LLM: ${{ secrets.PWNAGENT_LLM }}
-          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-        run: pwnagent -n -t ./ --scan-mode quick
-```
-
----
 
 ## Configuration
 
