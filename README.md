@@ -1,6 +1,3 @@
-<p align="center">
-  <img src=".github/logo.png" alt="Pwnagent Logo" width="200">
-</p>
 
 <h1 align="center">Pwnagent Sandbox</h1>
 
