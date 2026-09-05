@@ -85,3 +85,6 @@ Thumbs.db
 schema.graphql
 
 .opencode/
+
+# Packaged build artifacts
+pwnagent-*-windows-x86_64.zip
