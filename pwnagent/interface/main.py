@@ -783,9 +783,7 @@ def display_completion_message(args: argparse.Namespace, results_path: Path) -> 
     console.print(panel)
     console.print()
     console.print(
-        "[#60a5fa]pwnagent.ai[/]  [dim]·[/]  "
-        "[#60a5fa]docs.pwnagent.ai[/]  [dim]·[/]  "
-        "[#60a5fa]discord.gg/pwnagent-ai[/]"
+        "[#60a5fa]pwnsystem.com[/]"
     )
     console.print()
 

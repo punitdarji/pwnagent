@@ -101,16 +101,15 @@ We welcome feature ideas! Please:
 
 ## 🤝 Community
 
-- **Discord**: [Join our community](https://discord.gg/pwnagent-ai)
+- **Website**: [pwnsystem.com](https://pwnsystem.com)
 - **Issues**: [GitHub Issues](https://github.com/punitdarji/pwnagent/issues)
 
 ## ✨ Recognition
 
 We value all contributions! Contributors will be:
 - Listed in release notes
-- Thanked in our Discord
 - Added to contributors list (coming soon)
 
 ---
 
-**Questions?** Reach out on [Discord](https://discord.gg/pwnagent-ai) or create an issue. We're here to help!
+**Questions?** Create an issue. We're here to help!
